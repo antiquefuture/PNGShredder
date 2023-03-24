@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Combiner</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="container">
+    <div class="upload-area">
+      <input type="file" accept=".png" id="image1" class="image-upload">
+      <label for="gridSize1">Grid Size: <span id="gridSizeValue1">1</span></label>
+      <input type="range" min="1" max="10" value="1" id="gridSize1" class="grid-slider">
+      <label for="weight1">Weight: <span id="weightValue1">1</span></label>
+      <input type="range" min="1" max="10" value="1" id="weight1" class="weight-slider">
+    </div>
+    <div class="upload-area">
+      <input type="file" accept=".png" id="image2" class="image-upload">
+      <label for="gridSize2">Grid Size: <span id="gridSizeValue2">1</span></label>
+      <input type="range" min="1" max="10" value="1" id="gridSize2" class="grid-slider">
+      <label for="weight2">Weight: <span id="weightValue2">1</span></label>
+      <input type="range" min="1" max="10" value="1" id="weight2" class="weight-slider">
+    </div>
+    <div class="upload-area">
+      <input type="file" accept=".png" id="image3" class="image-upload">
+      <label for="gridSize3">Grid Size: <span id="gridSizeValue3">1</span></label>
+      <input type="range" min="1" max="10" value="1" id="gridSize3" class="grid-slider">
+      <label for="weight3">Weight: <span id="weightValue3">1</span></label>
+      <input type="range" min="1" max="10" value="1" id="weight3" class="weight-slider">
+    </div>
+    <!-- div for the fourth image -->
+    <div class="upload-area">
+      <input type="file" accept=".png" id="image4" class="image-upload">
+      <label for="gridSize4">Grid Size: <span id="gridSizeValue4">1</span></label>
+      <input type="range" min="1" max="10" value="1" id="gridSize4" class="grid-slider">
+      <label for="weight4">Weight: <span id="weightValue4">1</span></label>
+      <input type="range" min="1" max="10" value="1" id="weight4" class="weight-slider">
+    </div>
+    <div class="thumbnail-container">
+      <img id="thumbnail1" class="thumbnail" alt="Image 1 thumbnail">
+      <img id="thumbnail2" class="thumbnail" alt="Image 2 thumbnail">
+      <img id="thumbnail3" class="thumbnail" alt="Image 3 thumbnail">
+      <img id="thumbnail4" class="thumbnail" alt="Image 4 thumbnail">
+    </div>
+
+    <!-- button for setting random values -->
+    <button id="setRandomValues">Set Random Values</button>
+    <button id="generate">Generate Final Image</button>
+<canvas id="finalImage"></canvas>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>
