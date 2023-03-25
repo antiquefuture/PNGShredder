@@ -1,10 +1,17 @@
-function loadImage(src) {
-  return new Promise((resolve) => {
+function loadImage(file) {
+  return new Promise((resolve, reject) => {
+    if (!(file instanceof File)) {
+      reject(new Error('Invalid input, expected a File object.'));
+      return;
+    }
+
     const img = new Image();
     img.onload = () => resolve(img);
-    img.src = src;
+    img.onerror = () => reject(new Error('Failed to load image.'));
+    img.src = URL.createObjectURL(file);
   });
 }
+
 
 async function handleImageUpload(input) {
   const file = input.files[0];
@@ -28,7 +35,17 @@ function createThumbnail(image, thumbnailId) {
 }
 
 function setRandomValues() {
-  document.querySelectorAll('.grid-slider, .weight-slider').forEach((slider) => {
+  const gridSliders = document.querySelectorAll('.grid-slider');
+  const weightSliders = document.querySelectorAll('.weight-slider');
+
+  gridSliders.forEach((slider) => {
+    const randomValue = Math.floor(Math.random() * (slider.max - slider.min + 1)) + parseInt(slider.min);
+    slider.value = randomValue;
+    const valueSpan = document.getElementById(`${slider.id}Value`);
+    valueSpan.textContent = randomValue;
+  });
+
+  weightSliders.forEach((slider) => {
     const randomValue = Math.floor(Math.random() * (slider.max - slider.min + 1)) + parseInt(slider.min);
     slider.value = randomValue;
     const valueSpan = document.getElementById(`${slider.id}Value`);
@@ -75,9 +92,13 @@ function combineImages(images, gridSizes, weights) {
     }
   }
 
-  const finalImage = new Image();
-  finalImage.src = canvas.toDataURL('image/png');
-  return finalImage;
+  return new Promise((resolve) => {
+    const finalImage = new Image();
+    finalImage.onload = () => {
+      resolve(finalImage);
+    };
+    finalImage.src = canvas.toDataURL('image/png');
+  });
 }
 
 function blendBezierImage(outputImage, bezierImage) {
@@ -114,9 +135,13 @@ function blendBezierImage(outputImage, bezierImage) {
     ctx.save();
   }
 
-  const blendedImage = new Image();
-  blendedImage.src = canvas.toDataURL('image/png');
-  return blendedImage;
+  return new Promise((resolve) => {
+    const blendedImage = new Image();
+    blendedImage.onload = () => {
+      resolve(blendedImage);
+    };
+    blendedImage.src = canvas.toDataURL('image/png');
+  });
 }
 
 function drawFinalImage(image) {
@@ -124,7 +149,8 @@ function drawFinalImage(image) {
   const ctx = canvas.getContext('2d');
   canvas.width = image.width;
   canvas.height = image.height;
-  ctx.drawImage(image, 0, 0);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 }
 
 document.getElementById('generate').addEventListener('click', async () => {
@@ -139,37 +165,22 @@ document.getElementById('generate').addEventListener('click', async () => {
     parseInt(document.getElementById('gridSize1').value),
     parseInt(document.getElementById('gridSize2').value),
     parseInt(document.getElementById('gridSize3').value),
-    parseInt(document.getElementById('gridSize4').value),
   ];
 
   const weights = [
     parseInt(document.getElementById('weight1').value),
     parseInt(document.getElementById('weight2').value),
     parseInt(document.getElementById('weight3').value),
-    parseInt(document.getElementById('weight4').value),
   ];
 
-  const images = await Promise.all(imageFiles.map((file) => {
-    if (!file) return;
-    const reader = new FileReader();
-    return new Promise((resolve) => {
-      reader.onload = async (event) => {
-        const img = await loadImage(event.target.result);
-        resolve(img);
-      };
-      reader.readAsDataURL(file);
-    });
-  }));
+  const images = await Promise.all(imageFiles.map(loadImage));
 
   const combinedImages = images.slice(0, 3);
   const bezierImage = images[3];
-  const outputImage = combineImages(combinedImages, gridSizes.slice(0, 3), weights.slice(0, 3));
-  outputImage.onload = () => {
-    const blendedImage = blendBezierImage(outputImage, bezierImage);
-    blendedImage.onload = () => {
-      drawFinalImage(blendedImage);
-    };
-  };
+  const outputImage = await combineImages(combinedImages, gridSizes, weights);
+  const blendedImage = await blendBezierImage(outputImage, bezierImage);
+
+  drawFinalImage(blendedImage);
 });
 
 const gridSizeSliders = document.querySelectorAll('.grid-slider');
